@@ -1,0 +1,43 @@
+{
+  "trained_at": "2026-06-15T19:31:52.840581+00:00",
+  "model_type": "RandomForestClassifier",
+  "n_estimators": 200,
+  "n_training_samples": 240000,
+  "dataset_source": "trustnet_realworld_dataset_300000.csv",
+  "feature_columns": [
+    "hour_of_day",
+    "day_of_week",
+    "is_weekend",
+    "failed_attempts",
+    "session_duration",
+    "num_devices_used",
+    "ip_is_vpn",
+    "ip_is_tor",
+    "ip_is_proxy",
+    "ip_reputation_score",
+    "is_headless_browser",
+    "user_agent_entropy",
+    "form_fill_speed",
+    "mouse_movement_score",
+    "copy_paste_detected",
+    "tab_switches",
+    "time_on_each_field",
+    "geolocation_mismatch",
+    "distance_from_branch_km",
+    "previous_applications",
+    "applications_same_ip",
+    "applications_same_device",
+    "pan_seen_before",
+    "aadhaar_seen_before",
+    "velocity_score"
+  ],
+  "n_features": 25,
+  "model_version": "2.0.0",
+  "evaluation_metrics": {
+    "accuracy": 1.0,
+    "fraud_recall": 1.0,
+    "false_positive_rate": 0.0,
+    "f1_score": 1.0,
+    "roc_auc": 1.0
+  }
+}
