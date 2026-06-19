@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustNet — Loan Application</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* ── TOKENS ───────────────────────────────────────── */
+    :root {
+      --ink:       #0D1117;
+      --surface:   #F7F8FA;
+      --card:      #FFFFFF;
+      --border:    #E2E5EA;
+      --muted:     #8B95A2;
+      --accent:    #1B4FD8;
+      --accent-lt: #EEF2FF;
+      --green:     #12A05C;
+      --green-lt:  #EDFAF3;
+      --amber:     #C97A10;
+      --amber-lt:  #FFF8EB;
+      --red:       #D92D20;
+      --red-lt:    #FFF1F0;
+      --mono:      'JetBrains Mono', monospace;
+      --sans:      'Inter', sans-serif;
+      --r:         10px;
+      --shadow:    0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+    }
+
+    /* ── RESET ────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--sans);
+      background: var(--surface);
+      color: var(--ink);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── LAYOUT ───────────────────────────────────────── */
+    .shell {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    /* ── HEADER ───────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 36px;
+    }
+    .logo {
+      width: 40px; height: 40px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: grid; place-items: center;
+      font-size: 20px;
+    }
+    .logo-text h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -.3px;
+    }
+    .logo-text p {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+      letter-spacing: .3px;
+    }
+    .status-dot {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .4; }
+    }
+
+    /* ── PROGRESS BAR ─────────────────────────────────── */
+    .progress-track {
+      display: flex;
+      gap: 0;
+      margin-bottom: 32px;
+      border-radius: var(--r);
+      overflow: hidden;
+      background: var(--border);
+      height: 4px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width .4s ease;
+    }
+
+    .step-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+    .step-labels span.active { color: var(--accent); font-weight: 600; }
+    .step-labels span.done   { color: var(--green); }
+
+    /* ── CARD ─────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      padding: 32px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .card-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    /* ── FORM FIELDS ──────────────────────────────────── */
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .field-row.single { grid-template-columns: 1fr; }
+    @media (max-width: 540px) { .field-row { grid-template-columns: 1fr; } }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      font-family: var(--mono);
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .field input, .field select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--card);
+      transition: border-color .15s;
+      outline: none;
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-lt);
+    }
+    .field input.tracked { border-color: var(--border); }
+    .field input.tracked:focus { border-color: var(--accent); }
+
+    /* ── UPLOAD ZONE ──────────────────────────────────── */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--r);
+      padding: 32px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-lt);
+    }
+    .upload-zone input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 28px; margin-bottom: 8px; }
+    .upload-zone p { font-size: 13px; color: var(--muted); }
+    .upload-zone strong { color: var(--accent); }
+
+    .file-list {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+    .file-chip .fname { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-chip .fsize { color: var(--muted); font-family: var(--mono); font-size: 11px; }
+    .file-chip .rm {
+      color: var(--muted); cursor: pointer; font-size: 16px; line-height: 1;
+      padding: 2px 4px; border-radius: 4px;
+    }
+    .file-chip .rm:hover { background: var(--red-lt); color: var(--red); }
+
+    /* ── BEHAVIOUR METER ──────────────────────────────── */
+    .live-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    .live-panel-title {
+      font-size: 11px;
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .meters {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 480px) { .meters { grid-template-columns: 1fr 1fr; } }
+    .meter { }
+    .meter-label {
+      font-size: 10px;
+      font-family: var(--mono);
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .meter-bar-track {
+      height: 5px; background: var(--border); border-radius: 3px; overflow: hidden;
+    }
+    .meter-bar {
+      height: 100%;
+      border-radius: 3px;
+      background: var(--accent);
+      transition: width .3s ease;
+    }
+    .meter-val {
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--ink);
+      margin-top: 3px;
+    }
+
+    /* ── SUBMIT BUTTON ────────────────────────────────── */
+    .btn-submit {
+      width: 100%;
+      padding: 15px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--r);
+      font-family: var(--sans);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      margin-top: 4px;
+    }
+    .btn-submit:hover   { background: #1541b5; }
+    .btn-submit:active  { transform: scale(.99); }
+    .btn-submit:disabled { background: #B0BAC9; cursor: not-allowed; }
+
+    /* ── LOADER ───────────────────────────────────────── */
+    .loader-card {
+      display: none;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 40px 32px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .loader-card.visible { display: block; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: left;
+      max-width: 340px;
+      margin: 20px auto 0;
+    }
+    .loader-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      transition: color .3s;
+    }
+    .loader-step.active { color: var(--ink); }
+    .loader-step.done   { color: var(--green); }
+    .step-icon { font-size: 14px; width: 20px; text-align: center; }
+
+    /* ── RESULT CARD ──────────────────────────────────── */
+    .result-card {
+      display: none;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .result-card.visible { display: block; }
+
+    .verdict-banner {
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .verdict-banner.APPROVE { background: var(--green-lt); border-bottom: 1px solid #B6EDD4; }
+    .verdict-banner.REVIEW  { background: var(--amber-lt); border-bottom: 1px solid #F5D996; }
+    .verdict-banner.REJECT  { background: var(--red-lt);   border-bottom: 1px solid #FFC4C0; }
+
+    .verdict-icon { font-size: 40px; }
+    .verdict-text h2 { font-size: 22px; font-weight: 600; }
+    .verdict-text p  { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+    .score-ring {
+      margin-left: auto;
+      text-align: center;
+    }
+    .score-num {
+      font-size: 36px;
+      font-weight: 600;
+      font-family: var(--mono);
+      line-height: 1;
+    }
+    .score-label { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+
+    .result-body { padding: 24px 32px; }
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .module-chip {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .module-chip-label {
+      font-size: 10px;
+      font-family: var(--mono);
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .module-chip-score {
+      font-size: 20px;
+      font-weight: 600;
+      font-family: var(--mono);
+    }
+    .module-chip-bar {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .module-chip-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--accent);
+      transition: width .6s ease;
+    }
+
+    .flags-section { margin-top: 4px; }
+    .flags-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .flag-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    .flag-item.HIGH   { background: var(--red-lt); }
+    .flag-item.MEDIUM { background: var(--amber-lt); }
+    .flag-item.LOW    { background: var(--green-lt); }
+    .flag-badge {
+      font-size: 10px;
+      font-family: var(--mono);
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .flag-badge.HIGH   { background: var(--red);   color: white; }
+    .flag-badge.MEDIUM { background: var(--amber); color: white; }
+    .flag-badge.LOW    { background: var(--green); color: white; }
+
+    .no-flags {
+      text-align: center;
+      padding: 20px;
+      color: var(--green);
+      font-size: 14px;
+    }
+
+    .blocked-banner {
+      background: var(--red-lt);
+      border-bottom: 1px solid #FFC4C0;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .blocked-icon { font-size: 32px; }
+    .blocked-text h2 { font-size: 18px; font-weight: 600; color: var(--red); }
+    .blocked-text p  { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    .try-again {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--ink);
+      cursor: pointer;
+      margin-top: 16px;
+      transition: border-color .15s;
+    }
+    .try-again:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── RESPONSIVE ───────────────────────────────────── */
+    @media (max-width: 540px) {
+      .card { padding: 20px; }
+      .verdict-banner { flex-wrap: wrap; }
+      .result-body { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ── HEADER ──────────────────────────────────────── -->
+  <header>
+    <div class="logo">🛡️</div>
+    <div class="logo-text">
+      <h1>TrustNet</h1>
+      <p>FRAUD INTELLIGENCE PORTAL</p>
+    </div>
+    <div class="status-dot">
+      <div class="dot"></div>
+      LIVE
+    </div>
+  </header>
+
+  <!-- ── PROGRESS ────────────────────────────────────── -->
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill" style="width: 33%"></div>
+  </div>
+  <div class="step-labels">
+    <span id="step1lbl" class="active">APPLICANT</span>
+    <span id="step2lbl">DOCUMENTS</span>
+    <span id="step3lbl">RESULT</span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 1 — APPLICANT DETAILS
+  ═══════════════════════════════════════════════════════ -->
+  <div id="section1">
+    <div class="card">
+      <div class="card-title">Applicant Details</div>
+      <div class="card-sub">Fill in all fields. Your data is encrypted before leaving this page.</div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="fullName" class="tracked" placeholder="As on PAN card">
+        </div>
+        <div class="field">
+          <label>Mobile Number</label>
+          <input type="tel" id="mobile" class="tracked" placeholder="10-digit mobile">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>PAN Number</label>
+          <input type="text" id="panNumber" class="tracked" placeholder="XXXXX0000X" maxlength="10" style="text-transform:uppercase">
+        </div>
+        <div class="field">
+          <label>Aadhaar Number</label>
+          <input type="text" id="aadhaarNumber" class="tracked" placeholder="XXXX XXXX XXXX" maxlength="14">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Loan Amount (₹)</label>
+          <input type="number" id="loanAmount" class="tracked" placeholder="e.g. 500000">
+        </div>
+        <div class="field">
+          <label>Loan Type</label>
+          <select id="loanType">
+            <option value="">Select type</option>
+            <option value="personal">Personal Loan</option>
+            <option value="home">Home Loan</option>
+            <option value="business">Business Loan</option>
+            <option value="kisan">Kisan Credit Card</option>
+            <option value="vehicle">Vehicle Loan</option>
+            <option value="education">Education Loan</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row single">
+        <div class="field">
+          <label>Residential Address</label>
+          <input type="text" id="address" class="tracked" placeholder="House / Flat, Street, City, PIN">
+        </div>
+      </div>
+
+      <button class="btn-submit" id="nextBtn1" onclick="goToStep2()">Continue to Documents →</button>
+    </div>
+
+    <!-- Live behavior panel -->
+    <div class="live-panel">
+      <div class="live-panel-title">🔍 Real-time behaviour tracking (visible for demo)</div>
+      <div class="meters">
+        <div class="meter">
+          <div class="meter-label">Typing Speed</div>
+          <div class="meter-bar-track"><div class="meter-bar" id="mTyping" style="width:0%"></div></div>
+          <div class="meter-val" id="mTypingVal">— cps</div>
+        </div>
+        <div class="meter">
+          <div class="meter-label">Mouse Activity</div>
+          <div class="meter-bar-track"><div class="meter-bar" id="mMouse" style="width:0%"></div></div>
+          <div class="meter-val" id="mMouseVal">0 moves</div>
+        </div>
+        <div class="meter">
+          <div class="meter-label">Tab Switches</div>
+          <div class="meter-bar-track"><div class="meter-bar" id="mTab" style="width:0%"></div></div>
+          <div class="meter-val" id="mTabVal">0</div>
+        </div>
+        <div class="meter">
+          <div class="meter-label">Copy-Paste</div>
+          <div class="meter-bar-track"><div class="meter-bar" id="mPaste" style="width:0%"></div></div>
+          <div class="meter-val" id="mPasteVal">0 events</div>
+        </div>
+        <div class="meter">
+          <div class="meter-label">Time on Form</div>
+          <div class="meter-bar-track"><div class="meter-bar" id="mTime" style="width:0%"></div></div>
+          <div class="meter-val" id="mTimeVal">0s</div>
+        </div>
+        <div class="meter">
+          <div class="meter-label">Avg per Field</div>
+          <div class="meter-bar-track"><div class="meter-bar" id="mField" style="width:0%"></div></div>
+          <div class="meter-val" id="mFieldVal">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 2 — DOCUMENT UPLOAD
+  ═══════════════════════════════════════════════════════ -->
+  <div id="section2" style="display:none">
+    <div class="card">
+      <div class="card-title">Upload Documents</div>
+      <div class="card-sub">Upload salary slip, bank statement, and ID proof. PDF, JPG, or PNG — up to 5 files.</div>
+
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.docx">
+        <div class="upload-icon">📎</div>
+        <p><strong>Click to choose</strong> or drag and drop</p>
+        <p style="margin-top:4px; font-size:12px;">PDF, JPG, PNG, DOCX · max 5 files</p>
+      </div>
+
+      <div class="file-list" id="fileList"></div>
+
+      <div class="field-row single" style="margin-top:20px">
+        <div class="field">
+          <label>Primary document type</label>
+          <select id="docType">
+            <option value="">Auto-detect</option>
+            <option value="salary_slip">Salary Slip</option>
+            <option value="bank_statement">Bank Statement</option>
+            <option value="aadhaar">Aadhaar Card</option>
+            <option value="pan_card">PAN Card</option>
+            <option value="itr">Income Tax Return</option>
+            <option value="land_record">Land Record</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px; margin-top:4px;">
+        <button class="try-again" onclick="goToStep1()" style="flex:0 0 120px">← Back</button>
+        <button class="btn-submit" id="submitBtn" onclick="submitAnalysis()" style="flex:1">
+          Analyse Application
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       LOADER
+  ═══════════════════════════════════════════════════════ -->
+  <div class="loader-card" id="loaderCard">
+    <div class="spinner"></div>
+    <div style="font-size:15px; font-weight:600;">Analysing Application</div>
+    <div style="font-size:13px; color:var(--muted); margin-top:4px;">Running all detection modules…</div>
+    <div class="loader-steps" id="loaderSteps">
+      <div class="loader-step active" id="ls0"><span class="step-icon">🔐</span>Encrypting PAN &amp; Aadhaar</div>
+      <div class="loader-step" id="ls1"><span class="step-icon">🌐</span>Checking network &amp; VPN</div>
+      <div class="loader-step" id="ls2"><span class="step-icon">🖱️</span>Scoring behaviour signals</div>
+      <div class="loader-step" id="ls3"><span class="step-icon">📊</span>Benford's Law analysis</div>
+      <div class="loader-step" id="ls4"><span class="step-icon">🔍</span>Metadata forensics</div>
+      <div class="loader-step" id="ls5"><span class="step-icon">🧠</span>NLP semantic analysis</div>
+      <div class="loader-step" id="ls6"><span class="step-icon">🕸️</span>Cross-document entity graph</div>
+      <div class="loader-step" id="ls7"><span class="step-icon">🏦</span>Federated bank intelligence</div>
+      <div class="loader-step" id="ls8"><span class="step-icon">⚖️</span>Computing final verdict</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       RESULT
+  ═══════════════════════════════════════════════════════ -->
+  <div class="result-card" id="resultCard">
+    <div id="resultInner"></div>
+    <div style="padding: 0 32px 28px;">
+      <button class="try-again" onclick="resetForm()">← Analyse another application</button>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+// BACKEND URL — change this if your server is on a
+// different host or port
+// ═══════════════════════════════════════════════════════
+const API = 'http://localhost:8000';
+
+// ═══════════════════════════════════════════════════════
+// BEHAVIOURAL TRACKING
+// ═══════════════════════════════════════════════════════
+let mouseCount      = 0;
+let tabSwitches     = 0;
+let pasteCount      = 0;
+let startTime       = Date.now();
+let keystrokeTimes  = [];
+let fieldFocusTimes = {};  // fieldId → totalMs
+let fieldFocusStart = {};  // fieldId → Date.now()
+
+document.addEventListener('mousemove', () => mouseCount++);
+document.addEventListener('touchmove', () => mouseCount++);
+document.addEventListener('paste',     () => pasteCount++);
+document.addEventListener('visibilitychange', () => { if (document.hidden) tabSwitches++; });
+
+const trackedFields = ['fullName','mobile','panNumber','aadhaarNumber','loanAmount','address'];
+
+trackedFields.forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('keydown', () => keystrokeTimes.push(Date.now()));
+  el.addEventListener('focus', () => { fieldFocusStart[id] = Date.now(); });
+  el.addEventListener('blur',  () => {
+    if (fieldFocusStart[id]) {
+      fieldFocusTimes[id] = (fieldFocusTimes[id] || 0) + (Date.now() - fieldFocusStart[id]);
+      delete fieldFocusStart[id];
+    }
+  });
+});
+
+// ── Behaviour metric calculations ───────────────────
+function getFormFillSpeed() {
+  if (keystrokeTimes.length < 2) {
+    // text present but zero keystrokes = scripted injection → 999
+    const hasText = trackedFields.some(id => (document.getElementById(id)?.value || '').length > 0);
+    return hasText && keystrokeTimes.length === 0 ? 999 : 0;
+  }
+  const elapsedSec = (keystrokeTimes[keystrokeTimes.length - 1] - keystrokeTimes[0]) / 1000;
+  return elapsedSec > 0 ? parseFloat((keystrokeTimes.length / elapsedSec).toFixed(2)) : 999;
+}
+
+function getAvgTimePerField() {
+  // Close any still-open focus timers
+  Object.keys(fieldFocusStart).forEach(id => {
+    fieldFocusTimes[id] = (fieldFocusTimes[id] || 0) + (Date.now() - fieldFocusStart[id]);
+  });
+  const times = Object.values(fieldFocusTimes);
+  if (times.length === 0) return 0;
+  return parseFloat((times.reduce((a,b) => a+b, 0) / times.length / 1000).toFixed(2));
+}
+
+function getMouseScore() { return Math.min(mouseCount / 200, 1.0); }
+
+// ── Live meters update ───────────────────────────────
+setInterval(() => {
+  const elapsed = (Date.now() - startTime) / 1000;
+  const speed   = getFormFillSpeed();
+  const mouse   = mouseCount;
+  const avgField = getAvgTimePerField();
+
+  // Typing speed bar: 0–10 cps normal human range
+  const speedPct = Math.min(speed / 10, 1) * 100;
+  document.getElementById('mTyping').style.width = speedPct + '%';
+  document.getElementById('mTypingVal').textContent = speed === 999 ? '⚠️ bot?' : speed.toFixed(1) + ' cps';
+
+  // Mouse
+  const mousePct = Math.min(mouse / 500, 1) * 100;
+  document.getElementById('mMouse').style.width = mousePct + '%';
+  document.getElementById('mMouseVal').textContent = mouse + ' moves';
+
+  // Tab switches (cap at 5 for bar)
+  document.getElementById('mTab').style.width = Math.min(tabSwitches / 5, 1) * 100 + '%';
+  document.getElementById('mTabVal').textContent = tabSwitches;
+
+  // Paste
+  document.getElementById('mPaste').style.width = Math.min(pasteCount / 3, 1) * 100 + '%';
+  document.getElementById('mPasteVal').textContent = pasteCount + ' events';
+
+  // Time on form (cap at 10 min = 600s for bar)
+  document.getElementById('mTime').style.width = Math.min(elapsed / 600, 1) * 100 + '%';
+  document.getElementById('mTimeVal').textContent = Math.floor(elapsed) + 's';
+
+  // Avg time per field (cap at 30s for bar)
+  document.getElementById('mField').style.width = Math.min(avgField / 30, 1) * 100 + '%';
+  document.getElementById('mFieldVal').textContent = avgField > 0 ? avgField.toFixed(1) + 's' : '—';
+}, 800);
+
+// ═══════════════════════════════════════════════════════
+// FILE HANDLING
+// ═══════════════════════════════════════════════════════
+let selectedFiles = [];
+
+document.getElementById('fileInput').addEventListener('change', function() {
+  addFiles(Array.from(this.files));
+  this.value = '';
+});
+
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave',  () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault();
+  zone.classList.remove('drag-over');
+  addFiles(Array.from(e.dataTransfer.files));
+});
+
+function addFiles(files) {
+  files.forEach(f => {
+    if (selectedFiles.length >= 5) return;
+    if (!selectedFiles.find(x => x.name === f.name && x.size === f.size))
+      selectedFiles.push(f);
+  });
+  renderFileList();
+}
+
+function renderFileList() {
+  const list = document.getElementById('fileList');
+  list.innerHTML = selectedFiles.map((f, i) => `
+    <div class="file-chip">
+      <span>${f.type.includes('pdf') ? '📄' : f.type.includes('image') ? '🖼️' : '📎'}</span>
+      <span class="fname">${f.name}</span>
+      <span class="fsize">${(f.size/1024).toFixed(0)} KB</span>
+      <span class="rm" onclick="removeFile(${i})">✕</span>
+    </div>
+  `).join('');
+}
+
+function removeFile(i) {
+  selectedFiles.splice(i, 1);
+  renderFileList();
+}
+
+// ═══════════════════════════════════════════════════════
+// STEP NAVIGATION
+// ═══════════════════════════════════════════════════════
+function goToStep1() {
+  document.getElementById('section1').style.display = '';
+  document.getElementById('section2').style.display = 'none';
+  document.getElementById('progressFill').style.width = '33%';
+  document.getElementById('step1lbl').className = 'active';
+  document.getElementById('step2lbl').className = '';
+  document.getElementById('step3lbl').className = '';
+}
+
+function goToStep2() {
+  const name = document.getElementById('fullName').value.trim();
+  const pan  = document.getElementById('panNumber').value.trim();
+  if (!name) { alert('Please enter your full name.'); return; }
+  if (!pan)  { alert('Please enter your PAN number.'); return; }
+  document.getElementById('section1').style.display = 'none';
+  document.getElementById('section2').style.display = '';
+  document.getElementById('progressFill').style.width = '66%';
+  document.getElementById('step1lbl').className = 'done';
+  document.getElementById('step2lbl').className = 'active';
+  document.getElementById('step3lbl').className = '';
+}
+
+// ═══════════════════════════════════════════════════════
+// LOADER ANIMATION
+// ═══════════════════════════════════════════════════════
+function animateLoader() {
+  const steps = document.querySelectorAll('.loader-step');
+  const delays = [0, 600, 1200, 1800, 2400, 3000, 3600, 4200, 4800];
+  delays.forEach((d, i) => {
+    setTimeout(() => {
+      if (i > 0) steps[i-1].className = 'loader-step done';
+      steps[i].className = 'loader-step active';
+    }, d);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════════
+async function submitAnalysis() {
+  if (selectedFiles.length === 0) {
+    alert('Please upload at least one document.');
+    return;
+  }
+
+  // Close any open field timers
+  Object.keys(fieldFocusStart).forEach(id => {
+    fieldFocusTimes[id] = (fieldFocusTimes[id] || 0) + (Date.now() - fieldFocusStart[id]);
+  });
+
+  document.getElementById('section2').style.display = 'none';
+  document.getElementById('loaderCard').className = 'loader-card visible';
+  animateLoader();
+
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('step1lbl').className = 'done';
+  document.getElementById('step2lbl').className = 'done';
+  document.getElementById('step3lbl').className = 'active';
+
+  const elapsed       = (Date.now() - startTime) / 1000;
+  const formFillSpeed = getFormFillSpeed();
+  const avgPerField   = getAvgTimePerField();
+
+  const fd = new FormData();
+  fd.append('pan_number',           document.getElementById('panNumber').value.trim().toUpperCase());
+  fd.append('aadhaar_number',       document.getElementById('aadhaarNumber').value.trim());
+  fd.append('applicant_name', document.getElementById('nameInput').value.trim());
+  fd.append('user_agent',           navigator.userAgent);
+  fd.append('screen_resolution',    screen.width + 'x' + screen.height);
+  fd.append('timezone_str',         Intl.DateTimeFormat().resolvedOptions().timeZone);
+  fd.append('session_duration',     elapsed.toString());
+  fd.append('mouse_movement_score', getMouseScore().toString());
+  fd.append('copy_paste_detected',  (pasteCount > 0 ? 1 : 0).toString());
+  fd.append('form_fill_speed',      formFillSpeed.toString());
+  fd.append('time_on_each_field',   avgPerField.toString());
+  fd.append('tab_switches',         tabSwitches.toString());
+  fd.append('document_type',        document.getElementById('docType').value);
+
+  const keys = ['file1','file2','file3','file4','file5'];
+  selectedFiles.slice(0, 5).forEach((f, i) => fd.append(keys[i], f));
+
+  try {
+    const resp = await fetch(`${API}/analyse`, { method: 'POST', body: fd });
+    const data = await resp.json();
+    document.getElementById('loaderCard').className = 'loader-card';
+    renderResult(data);
+  } catch (err) {
+    document.getElementById('loaderCard').className = 'loader-card';
+    renderError(err.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER RESULT
+// ═══════════════════════════════════════════════════════
+function verdictMeta(v) {
+  if (v === 'APPROVE') return { icon:'✅', label:'Application Approved', sub:'Behaviour and documents look genuine.', cls:'APPROVE' };
+  if (v === 'REVIEW')  return { icon:'🟡', label:'Flagged for Manual Review', sub:'Some signals need a human look.', cls:'REVIEW' };
+  return                      { icon:'🔴', label:'Application Rejected', sub:'High-risk signals detected across modules.', cls:'REJECT' };
+}
+
+function scoreColor(s) {
+  if (s < 35) return 'var(--green)';
+  if (s < 65) return 'var(--amber)';
+  return 'var(--red)';
+}
+
+function renderResult(data) {
+  const rc = document.getElementById('resultCard');
+  const inner = document.getElementById('resultInner');
+
+  // ── Blocked by VPN? ──────────────────────────────────
+  const behavior = data.modules?.behavior || {};
+  if (behavior.blocked) {
+    inner.innerHTML = `
+      <div class="blocked-banner">
+        <div class="blocked-icon">🚫</div>
+        <div class="blocked-text">
+          <h2>Upload Blocked</h2>
+          <p>${behavior.block_reason || 'VPN / Tor / Proxy detected'}</p>
+        </div>
+      </div>
+      <div class="result-body">
+        <p style="font-size:13px;color:var(--muted);">
+          Please disable your VPN and submit again using a regular internet connection.
+        </p>
+      </div>
+    `;
+    rc.className = 'result-card visible';
+    return;
+  }
+
+  const verdict = data.verdict || {};
+  const finalScore = verdict.final_score ?? 50;
+  const vm = verdictMeta(verdict.verdict || 'REVIEW');
+  const ms = data.module_scores || {};
+
+  // Module chips
+  const chipDefs = [
+    { key: 'behavior',  label: 'Behaviour' },
+    { key: 'benfords',  label: "Benford's Law" },
+    { key: 'metadata',  label: 'Metadata' },
+    { key: 'nlp',       label: 'NLP Semantics' },
+    { key: 'federated', label: 'Federated' },
+  ];
+
+  const chips = chipDefs.map(({ key, label }) => {
+    const s = ms[key];
+    if (s == null) return '';
+    const pct = Math.min(s, 100);
+    return `
+      <div class="module-chip">
+        <div class="module-chip-label">${label}</div>
+        <div class="module-chip-score" style="color:${scoreColor(s)}">${Math.round(s)}</div>
+        <div class="module-chip-bar">
+          <div class="module-chip-bar-fill" style="width:${pct}%;background:${scoreColor(s)}"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // GNN chip
+  const gnn = data.modules?.gnn;
+  const gnnChip = gnn ? `
+    <div class="module-chip">
+      <div class="module-chip-label">Entity Graph</div>
+      <div class="module-chip-score" style="color:${gnn.fraud_ring_detected ? 'var(--red)' : 'var(--green)'}">
+        ${gnn.fraud_ring_detected ? '⚠ Ring' : '✓ Clean'}
+      </div>
+      <div class="module-chip-bar">
+        <div class="module-chip-bar-fill" style="width:${gnn.fraud_ring_detected ? 100 : 10}%;background:${gnn.fraud_ring_detected ? 'var(--red)' : 'var(--green)'}"></div>
+      </div>
+    </div>` : '';
+
+  // Flags — collect from all modules
+  let allFlags = [];
+  if (Array.isArray(behavior.flags)) behavior.flags.forEach(f => allFlags.push(f));
+  const nlpResults = data.modules?.nlp || [];
+  (Array.isArray(nlpResults) ? nlpResults : [nlpResults]).forEach(r => {
+    if (Array.isArray(r.flags)) r.flags.forEach(f => allFlags.push({ severity: f.severity || 'MEDIUM', message: f.check_name || JSON.stringify(f) }));
+  });
+  const metaResults = data.modules?.metadata || [];
+  (Array.isArray(metaResults) ? metaResults : [metaResults]).forEach(r => {
+    if (Array.isArray(r.flags)) r.flags.forEach(f => allFlags.push({ severity: 'MEDIUM', message: typeof f === 'string' ? f : JSON.stringify(f) }));
+  });
+
+  const flagsHtml = allFlags.length === 0
+    ? `<div class="no-flags">✅ No suspicious flags detected across all modules</div>`
+    : allFlags.map(f => `
+        <div class="flag-item ${f.severity || 'MEDIUM'}">
+          <span class="flag-badge ${f.severity || 'MEDIUM'}">${f.severity || 'MEDIUM'}</span>
+          <span>${f.message || f.flag || JSON.stringify(f)}</span>
+        </div>`).join('');
+
+  inner.innerHTML = `
+    <div class="verdict-banner ${vm.cls}">
+      <div class="verdict-icon">${vm.icon}</div>
+      <div class="verdict-text">
+        <h2>${vm.label}</h2>
+        <p>${vm.sub}</p>
+      </div>
+      <div class="score-ring">
+        <div class="score-num" style="color:${scoreColor(finalScore)}">${Math.round(finalScore)}</div>
+        <div class="score-label">RISK SCORE</div>
+      </div>
+    </div>
+    <div class="result-body">
+      <div class="module-grid">${chips}${gnnChip}</div>
+      <div class="flags-section">
+        <div class="flags-title">🚩 Detection Flags (${allFlags.length})</div>
+        ${flagsHtml}
+      </div>
+      ${data.encrypted_pii?.pan ? `
+        <div style="margin-top:20px;padding:12px 16px;background:var(--accent-lt);border-radius:8px;font-size:12px;font-family:var(--mono);color:var(--accent);">
+          🔐 PAN encrypted (ML-KEM-768) · ${data.encrypted_pii.pan.ciphertext?.substring(0,40)}…
+        </div>` : ''}
+      ${data.errors?.length ? `
+        <details style="margin-top:16px;">
+          <summary style="font-size:12px;color:var(--muted);cursor:pointer;">${data.errors.length} module warning(s)</summary>
+          <pre style="font-size:11px;margin-top:8px;padding:10px;background:var(--surface);border-radius:6px;color:var(--muted);white-space:pre-wrap;">${data.errors.join('\n')}</pre>
+        </details>` : ''}
+    </div>
+  `;
+
+  rc.className = 'result-card visible';
+}
+
+function renderError(msg) {
+  const inner = document.getElementById('resultInner');
+  inner.innerHTML = `
+    <div class="blocked-banner">
+      <div class="blocked-icon">❌</div>
+      <div class="blocked-text">
+        <h2>Could Not Reach Backend</h2>
+        <p>${msg}</p>
+      </div>
+    </div>
+    <div class="result-body">
+      <p style="font-size:13px;color:var(--muted);">
+        Make sure <code>backend/main.py</code> is running on
+        <strong>localhost:8000</strong> and try again.
+      </p>
+    </div>
+  `;
+  document.getElementById('resultCard').className = 'result-card visible';
+}
+
+function resetForm() {
+  document.getElementById('resultCard').className = 'result-card';
+  document.getElementById('loaderCard').className = 'loader-card';
+  document.getElementById('section1').style.display = '';
+  document.getElementById('section2').style.display = 'none';
+  document.getElementById('progressFill').style.width = '33%';
+  document.getElementById('step1lbl').className = 'active';
+  document.getElementById('step2lbl').className = '';
+  document.getElementById('step3lbl').className = '';
+  selectedFiles = [];
+  renderFileList();
+  // reset tracking
+  mouseCount = 0; tabSwitches = 0; pasteCount = 0;
+  keystrokeTimes = []; fieldFocusTimes = {}; fieldFocusStart = {};
+  startTime = Date.now();
+  trackedFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('loanType').value = '';
+  document.getElementById('docType').value = '';
+}
+</script>
+</body>
+</html>
