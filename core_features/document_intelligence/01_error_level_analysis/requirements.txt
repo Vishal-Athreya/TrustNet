@@ -1,0 +1,13 @@
+# requirements.txt — 01_error_level_analysis
+# TrustNet | Python 3.13 · Windows 11
+#
+# IMPORTANT COMPATIBILITY NOTES (hard-won — do not change without testing):
+#   PyMuPDF  : must be ≥ 1.26.1 — 1.24.x has no Python 3.13 wheel on Windows
+#   Pillow   : 10+ required for full Python 3.13 support
+#   numpy    : 2.x required for Python 3.13 compatibility
+#   opencv-python : headless not needed here; full build includes cv2.applyColorMap
+
+PyMuPDF>=1.26.1
+Pillow>=10.0.0
+numpy>=2.0.0
+opencv-python>=4.9.0
